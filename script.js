@@ -106,8 +106,140 @@ if (choices && choiceOutput) {
 }
 
 const playDemo = document.getElementById("playDemo");
+const storyModal = document.getElementById("storyModal");
+const closeStory = document.getElementById("closeStory");
+const storyTitle = document.getElementById("storyTitle");
+const storyCopy = document.getElementById("storyCopy");
+const storyProgress = document.getElementById("storyProgress");
+const storyStep = document.getElementById("storyStep");
+const storyPrev = document.getElementById("storyPrev");
+const storyNext = document.getElementById("storyNext");
+
+const storyScenes = [
+  {
+    title: "From scattered wellness spending to one clear plan.",
+    copy: "High-intent users waste money across fragmented providers, disconnected data, and unverified options."
+  },
+  {
+    title: "Step 1: User sets a goal in under 4 minutes.",
+    copy: "Energy, fat loss, better sleep, or longevity. The intake captures goals, budget, and constraints in one guided flow."
+  },
+  {
+    title: "Step 2: NovusVital builds a practical protocol path.",
+    copy: "The app maps vetted tests, therapies, supplements, and provider options to a realistic action plan."
+  },
+  {
+    title: "Step 3: Booking and payment happen in one place.",
+    copy: "Users can browse trusted partner offers, reserve appointments, and pay without juggling multiple systems."
+  },
+  {
+    title: "Step 4: Outcomes are tracked over time.",
+    copy: "Biomarker trends, adherence, and repeat behavior become visible so users know what is actually working."
+  },
+  {
+    title: "Business model: revenue on every successful journey.",
+    copy: "NovusVital earns from booking commissions, premium memberships, and partner tooling, with B2B expansion later."
+  }
+];
+
+let storyIndex = 0;
+let storyTimer = null;
+const storyDurationMs = 45000;
+const perSceneMs = Math.floor(storyDurationMs / storyScenes.length);
+
+function renderStoryScene(index) {
+  if (!storyTitle || !storyCopy || !storyProgress || !storyStep) {
+    return;
+  }
+
+  const scene = storyScenes[index];
+  storyTitle.textContent = scene.title;
+  storyCopy.textContent = scene.copy;
+  storyStep.textContent = `Scene ${index + 1} of ${storyScenes.length}`;
+
+  const progress = ((index + 1) / storyScenes.length) * 100;
+  storyProgress.style.width = `${progress}%`;
+}
+
+function stopStoryTimer() {
+  if (storyTimer) {
+    clearInterval(storyTimer);
+    storyTimer = null;
+  }
+}
+
+function closeStoryModal() {
+  if (!storyModal) {
+    return;
+  }
+
+  stopStoryTimer();
+  storyModal.classList.remove("show");
+  storyModal.setAttribute("aria-hidden", "true");
+}
+
+function startStory() {
+  if (!storyModal) {
+    return;
+  }
+
+  stopStoryTimer();
+  storyIndex = 0;
+  renderStoryScene(storyIndex);
+  storyModal.classList.add("show");
+  storyModal.setAttribute("aria-hidden", "false");
+
+  storyTimer = setInterval(() => {
+    storyIndex += 1;
+
+    if (storyIndex >= storyScenes.length) {
+      closeStoryModal();
+      return;
+    }
+
+    renderStoryScene(storyIndex);
+  }, perSceneMs);
+}
+
+function goToStoryScene(stepDelta) {
+  const nextIndex = Math.max(0, Math.min(storyScenes.length - 1, storyIndex + stepDelta));
+  if (nextIndex === storyIndex) {
+    return;
+  }
+
+  storyIndex = nextIndex;
+  renderStoryScene(storyIndex);
+}
+
 if (playDemo) {
-  playDemo.addEventListener("click", () => {
-    window.alert("Demo storyboard: Intake -> Match -> Book -> Track. This prototype is presentation-ready for partner calls.");
+  playDemo.addEventListener("click", startStory);
+}
+
+if (closeStory) {
+  closeStory.addEventListener("click", closeStoryModal);
+}
+
+if (storyModal) {
+  storyModal.addEventListener("click", (event) => {
+    if (event.target === storyModal) {
+      closeStoryModal();
+    }
+  });
+}
+
+if (storyPrev) {
+  storyPrev.addEventListener("click", () => {
+    goToStoryScene(-1);
+  });
+}
+
+if (storyNext) {
+  storyNext.addEventListener("click", () => {
+    if (storyIndex >= storyScenes.length - 1) {
+      closeStoryModal();
+      return;
+    }
+
+    goToStoryScene(1);
   });
 }
