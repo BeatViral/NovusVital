@@ -112,40 +112,78 @@ const storyTitle = document.getElementById("storyTitle");
 const storyCopy = document.getElementById("storyCopy");
 const storyProgress = document.getElementById("storyProgress");
 const storyStep = document.getElementById("storyStep");
+const storyLabel = document.getElementById("storyLabel");
+const storyStat = document.getElementById("storyStat");
+const storyHint = document.getElementById("storyHint");
+const storyTimer = document.getElementById("storyTimer");
+const storyDots = document.getElementById("storyDots");
 const storyPrev = document.getElementById("storyPrev");
 const storyNext = document.getElementById("storyNext");
 
 const storyScenes = [
   {
+    label: "Problem Framing",
     title: "From scattered wellness spending to one clear plan.",
-    copy: "High-intent users waste money across fragmented providers, disconnected data, and unverified options."
+    copy: "High-intent users waste money across fragmented providers, disconnected data, and unverified options.",
+    stat: "$2.7k",
+    hint: "Average monthly spend before consolidation across services and products."
   },
   {
+    label: "Intake",
     title: "Step 1: User sets a goal in under 4 minutes.",
-    copy: "Energy, fat loss, better sleep, or longevity. The intake captures goals, budget, and constraints in one guided flow."
+    copy: "Energy, fat loss, better sleep, or longevity. The intake captures goals, budget, and constraints in one guided flow.",
+    stat: "4 min",
+    hint: "Fast onboarding improves completion and boosts conversion into bookings."
   },
   {
+    label: "Protocol Match",
     title: "Step 2: NovusVital builds a practical protocol path.",
-    copy: "The app maps vetted tests, therapies, supplements, and provider options to a realistic action plan."
+    copy: "The app maps vetted tests, therapies, supplements, and provider options to a realistic action plan.",
+    stat: "3.4x",
+    hint: "Faster path from decision to action compared with fragmented app journeys."
   },
   {
+    label: "Booking",
     title: "Step 3: Booking and payment happen in one place.",
-    copy: "Users can browse trusted partner offers, reserve appointments, and pay without juggling multiple systems."
+    copy: "Users can browse trusted partner offers, reserve appointments, and pay without juggling multiple systems.",
+    stat: "$1,740",
+    hint: "Current pilot average booking value across diagnostic and therapy categories."
   },
   {
+    label: "Outcomes",
     title: "Step 4: Outcomes are tracked over time.",
-    copy: "Biomarker trends, adherence, and repeat behavior become visible so users know what is actually working."
+    copy: "Biomarker trends, adherence, and repeat behavior become visible so users know what is actually working.",
+    stat: "+18.7%",
+    hint: "Composite vitality score improvement over 8 weeks in pilot data."
   },
   {
+    label: "Monetization",
     title: "Business model: revenue on every successful journey.",
-    copy: "NovusVital earns from booking commissions, premium memberships, and partner tooling, with B2B expansion later."
+    copy: "NovusVital earns from booking commissions, premium memberships, and partner tooling, with B2B expansion later.",
+    stat: "24.2%",
+    hint: "Blended take rate target from curated marketplace transactions."
   }
 ];
 
 let storyIndex = 0;
-let storyTimer = null;
+let storySceneTimer = null;
+let storyClockTimer = null;
+let storyRemainingMs = 0;
 const storyDurationMs = 45000;
 const perSceneMs = Math.floor(storyDurationMs / storyScenes.length);
+
+if (storyDots) {
+  storyDots.innerHTML = storyScenes.map(() => "<span></span>").join("");
+}
+
+function formatDuration(ms) {
+  const totalSeconds = Math.max(0, Math.ceil(ms / 1000));
+  const minutes = Math.floor(totalSeconds / 60)
+    .toString()
+    .padStart(2, "0");
+  const seconds = (totalSeconds % 60).toString().padStart(2, "0");
+  return `${minutes}:${seconds}`;
+}
 
 function renderStoryScene(index) {
   if (!storyTitle || !storyCopy || !storyProgress || !storyStep) {
@@ -153,18 +191,39 @@ function renderStoryScene(index) {
   }
 
   const scene = storyScenes[index];
+  if (storyLabel) {
+    storyLabel.textContent = scene.label;
+  }
   storyTitle.textContent = scene.title;
   storyCopy.textContent = scene.copy;
+  if (storyStat) {
+    storyStat.textContent = scene.stat;
+  }
+  if (storyHint) {
+    storyHint.textContent = scene.hint;
+  }
   storyStep.textContent = `Scene ${index + 1} of ${storyScenes.length}`;
 
   const progress = ((index + 1) / storyScenes.length) * 100;
   storyProgress.style.width = `${progress}%`;
+
+  if (storyDots) {
+    const dots = storyDots.querySelectorAll("span");
+    dots.forEach((dot, dotIndex) => {
+      dot.classList.toggle("active", dotIndex <= index);
+    });
+  }
 }
 
 function stopStoryTimer() {
-  if (storyTimer) {
-    clearInterval(storyTimer);
-    storyTimer = null;
+  if (storySceneTimer) {
+    clearInterval(storySceneTimer);
+    storySceneTimer = null;
+  }
+
+  if (storyClockTimer) {
+    clearInterval(storyClockTimer);
+    storyClockTimer = null;
   }
 }
 
@@ -185,11 +244,15 @@ function startStory() {
 
   stopStoryTimer();
   storyIndex = 0;
+  storyRemainingMs = storyDurationMs;
   renderStoryScene(storyIndex);
+  if (storyTimer) {
+    storyTimer.textContent = formatDuration(storyRemainingMs);
+  }
   storyModal.classList.add("show");
   storyModal.setAttribute("aria-hidden", "false");
 
-  storyTimer = setInterval(() => {
+  storySceneTimer = setInterval(() => {
     storyIndex += 1;
 
     if (storyIndex >= storyScenes.length) {
@@ -199,6 +262,13 @@ function startStory() {
 
     renderStoryScene(storyIndex);
   }, perSceneMs);
+
+  storyClockTimer = setInterval(() => {
+    storyRemainingMs -= 1000;
+    if (storyTimer) {
+      storyTimer.textContent = formatDuration(storyRemainingMs);
+    }
+  }, 1000);
 }
 
 function goToStoryScene(stepDelta) {

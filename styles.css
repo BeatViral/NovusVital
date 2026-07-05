@@ -413,17 +413,49 @@ footer {
 
 .story-card {
   width: min(760px, 94vw);
-  border-radius: 18px;
+  border-radius: 22px;
   border: 1px solid var(--line);
   background: linear-gradient(165deg, rgba(19, 42, 42, 0.96), rgba(11, 26, 26, 0.98));
-  padding: 24px;
+  padding: 26px;
   position: relative;
   box-shadow: 0 24px 80px rgba(0, 0, 0, 0.45);
+  overflow: hidden;
+}
+
+.story-card::before {
+  content: "";
+  position: absolute;
+  width: 220px;
+  height: 220px;
+  border-radius: 999px;
+  top: -80px;
+  right: -70px;
+  background: radial-gradient(circle, rgba(219, 194, 122, 0.32), rgba(219, 194, 122, 0));
+  pointer-events: none;
+}
+
+.story-layout {
+  display: grid;
+  grid-template-columns: 1.8fr 1fr;
+  gap: 18px;
+}
+
+.story-pill {
+  display: inline-flex;
+  margin: 0 0 10px;
+  padding: 6px 10px;
+  border-radius: 999px;
+  font-size: 0.78rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  border: 1px solid var(--line);
+  color: var(--accent);
+  background: rgba(219, 194, 122, 0.1);
 }
 
 .story-copy {
   margin-top: 12px;
-  color: var(--muted);
+  color: #d6d0bc;
   line-height: 1.65;
   min-height: 88px;
 }
@@ -445,9 +477,68 @@ footer {
 }
 
 .story-step {
-  margin-top: 10px;
+  margin-top: 0;
   color: var(--success);
   font-size: 0.9rem;
+}
+
+.story-meta {
+  margin-top: 10px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.story-timer {
+  margin: 0;
+  color: var(--accent);
+  font-weight: 700;
+  letter-spacing: 0.06em;
+}
+
+.story-dots {
+  margin-top: 12px;
+  display: grid;
+  grid-template-columns: repeat(6, minmax(0, 1fr));
+  gap: 6px;
+}
+
+.story-dots span {
+  height: 6px;
+  border-radius: 999px;
+  background: rgba(219, 194, 122, 0.2);
+}
+
+.story-dots span.active {
+  background: #dbc27a;
+  box-shadow: 0 0 14px rgba(219, 194, 122, 0.8);
+}
+
+.story-insight {
+  border: 1px solid var(--line);
+  border-radius: 14px;
+  padding: 14px;
+  background: rgba(10, 24, 24, 0.72);
+}
+
+.insight-label {
+  margin: 0;
+  color: #9eb5ab;
+  text-transform: uppercase;
+  letter-spacing: 0.14em;
+  font-size: 0.72rem;
+}
+
+.story-insight h4 {
+  margin: 8px 0;
+  font-size: clamp(1.6rem, 3vw, 2.4rem);
+  color: var(--accent);
+}
+
+.story-insight p {
+  margin: 0;
+  color: #c6c0ab;
+  line-height: 1.6;
 }
 
 .close {
@@ -517,6 +608,14 @@ footer {
   .outcomes-layout,
   .choices {
     grid-template-columns: 1fr;
+  }
+
+  .story-layout {
+    grid-template-columns: 1fr;
+  }
+
+  .story-copy {
+    min-height: 0;
   }
 
   .split {
